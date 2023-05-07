@@ -15,8 +15,6 @@ type htmlCrawler struct {
 
 func (h *htmlCrawler) Start(processExternal bool) error {
 	visited := make(map[string]bool)
-	//errorUrls := make(map[string]string)
-	//results := make(chan map[string][]string)
 	filters := urlFilters(h.Seed, processExternal)
 
 	queue := h.Seed
@@ -24,31 +22,6 @@ func (h *htmlCrawler) Start(processExternal bool) error {
 	results := urlWorker.GetResultChan()
 	go urlWorker.Run(filters, visited)
 	displayResults(results)
-
-	/*
-		for len(queue) > 0 {
-			curUrl := queue[0]
-			queue = queue[1:]
-
-			if visited[curUrl] {
-				continue
-			}
-
-			links, err := processUrl(curUrl, filters)
-			if err != nil {
-				errorUrls[curUrl] = err.Error()
-			}
-
-			queue = append(queue, links...)
-			results <- map[string][]string{
-				curUrl: links,
-			}
-			visited[curUrl] = true
-		}
-
-		close(results)
-
-	*/
 	return nil
 }
 
