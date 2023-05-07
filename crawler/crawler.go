@@ -2,7 +2,7 @@ package crawler
 
 import (
 	"fmt"
-	"github.com/Mutusva/monzo-webcrawler"
+	monzo_interview "github.com/Mutusva/monzo-webcrawler"
 	"golang.org/x/net/html"
 	"net/http"
 	"net/url"
@@ -15,9 +15,14 @@ type htmlCrawler struct {
 func (h *htmlCrawler) Start(processExternal bool) error {
 	visited := make(map[string]bool)
 	errorUrls := make(map[string]string)
+	results := make(chan map[string][]string)
 	filters := urlFilters(h.Seed, processExternal)
+	go displayResults(results)
 
 	queue := h.Seed
+	//urlWorker := worker.NewWorker(10, queue, processUrl)
+	//result := urlWorker.GetResultChan()
+	//go urlWorker.Run(filters, visited)
 	for len(queue) > 0 {
 		curUrl := queue[0]
 		queue = queue[1:]
@@ -26,15 +31,29 @@ func (h *htmlCrawler) Start(processExternal bool) error {
 			continue
 		}
 
-		// process links
 		links, err := processUrl(curUrl, filters)
-		fmt.Printf("%v", links)
-
 		if err != nil {
 			errorUrls[curUrl] = err.Error()
 		}
+
+		queue = append(queue, links...)
+		results <- map[string][]string{
+			curUrl: links,
+		}
+		visited[curUrl] = true
 	}
+
+	close(results)
 	return nil
+}
+
+func displayResults(results <-chan map[string][]string) {
+	for result := range results {
+		for k := range result {
+			fmt.Printf("-----------------links on %s url-------------------\n", k)
+			fmt.Printf("%v \n", result[k])
+		}
+	}
 }
 
 // processUrl makes 'an' Http request to the url

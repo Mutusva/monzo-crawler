@@ -5,6 +5,8 @@ type Crawler interface {
 }
 
 type Worker interface {
+	Run(filters []string, visited map[string]bool)
+	GetResultChan() chan map[string][]string
 }
 
 type Job struct {
