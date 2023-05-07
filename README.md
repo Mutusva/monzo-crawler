@@ -8,3 +8,8 @@ This is a simple web crawler that crawls only the web links available from the d
 3) To run tests run `make test`
 
 2) cd into the monzo-crawler folder and run the commang `go run ./cmd/main.go` to run the program with default configurations
+
+
+
+## Notes
+- I added a worker package to be able to execute the crawling in parallel but had a challenge putting it all together in the time I had.
