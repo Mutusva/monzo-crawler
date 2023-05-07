@@ -1,5 +1,7 @@
 package monzo_interview
 
+import "sync"
+
 type Crawler interface {
 	Start(bool) error
 }
@@ -7,6 +9,7 @@ type Crawler interface {
 type Worker interface {
 	Run(filters []string, visited map[string]bool)
 	GetResultChan() chan map[string][]string
+	GenerateJobs(filters []string, visited map[string]bool, wg *sync.WaitGroup)
 }
 
 type Job struct {
