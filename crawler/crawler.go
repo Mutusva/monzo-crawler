@@ -1,12 +1,14 @@
 package crawler
 
 import (
+	"context"
 	"fmt"
 	monzo_interview "github.com/Mutusva/monzo-webcrawler"
 	"github.com/Mutusva/monzo-webcrawler/worker"
 	"golang.org/x/net/html"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 type htmlCrawler struct {
@@ -43,9 +45,27 @@ func processUrl(curUrl string, filters []string) ([]string, error) {
 		return pageLinks, err
 	}
 
-	resp, err := http.Get(parsedUrl.String())
+	req, err := http.NewRequest(http.MethodGet, parsedUrl.String(), nil)
 	if err != nil {
-		fmt.Println("Error making request:", err)
+		fmt.Printf("%v", err)
+		return pageLinks, err
+	}
+
+	// Cancel the request if it does not respond in time
+	ctx, cancel := context.WithTimeout(req.Context(), 1*time.Second)
+	defer cancel()
+
+	req = req.WithContext(ctx)
+	client := http.Client{}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Printf("%v", err)
+		return pageLinks, err
+	}
+
+	// if response status not 200 return
+	if resp.StatusCode != http.StatusOK {
 		return pageLinks, err
 	}
 
